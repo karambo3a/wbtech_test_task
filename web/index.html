@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+      <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Orders</h1>
+    <div id="container" class="container">
+        <input type="text" id="order_id" name="order_id" autocomplete="off" placeholder="order id"/>
+        <input type="button" id="button" name="button" value="get" onclick="getOrder()">
+    </div>
+
+    <div id="container_json" class="container_json hidden" >
+        <pre id="json"></pre>
+        <input type="button" id="back_button" value="back" onclick="showSearch()">
+    </div>
+
+    <div id="error" class="error">
+        <span id="errorSpan"></br>
+    </div>
+
+    <script>
+        function getOrder() {
+            document.getElementById("error").innerHTML = ""
+
+            const orderId = document.getElementById("order_id").value
+
+            fetch(`http://localhost:8081/order/${orderId}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`)
+                }
+                return response.json()
+            })
+            .then((json) => {
+                console.log(json)
+                document.getElementById("json").textContent = JSON.stringify(json, undefined, 2);
+                showResult()
+            })
+            .catch((error) => {
+                console.log(`Could not fetch: ${error}`)
+                document.getElementById("error").innerHTML = `${error} order id ${orderId}`
+            });
+        }
+
+        function showResult() {
+            document.getElementById("container").classList.add("hidden")
+            document.getElementById("container_json").classList.remove("hidden")
+        }
+
+        function showSearch() {
+            document.getElementById("container_json").classList.add("hidden")
+            document.getElementById("container").classList.remove("hidden")
+            document.getElementById("order_id").value = ""
+            document.getElementById("order_id").focus()
+        }
+
+        function showError(error) {
+
+        }
+    </script>
+</body>
+</html>
+
+
+<!-- b563feb7b2b84b6test -->
