@@ -8,9 +8,9 @@ import (
 //go:generate mockgen -source=repository.go -destination=../../test/mocks/repository_mock.go
 
 type OrderRepositoryInterface interface {
-	GetOrder(orderUID string) (model.Order, error)
-	SaveOrder(order model.Order) error
-	GetAllOrders() ([]model.Order, error)
+	GetOrder(orderUID string) (*model.Order, error)
+	SaveOrder(order *model.Order) error
+	GetAllOrders(limit int64) ([]*model.Order, error)
 }
 
 type Repository struct {

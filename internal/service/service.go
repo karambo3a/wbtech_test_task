@@ -11,7 +11,7 @@ import (
 
 type OrderServiceInterface interface {
 	SaveOrder(msg []byte) error
-	GetOrder(orderUID string) (model.Order, error)
+	GetOrder(orderUID string) (*model.Order, error)
 	CloseConsumer()
 }
 
@@ -19,8 +19,8 @@ type Service struct {
 	OrderServiceInterface
 }
 
-func NewService(repository *repository.Repository, consumer consumer.Consumer, cache cache.RedisCache) *Service {
+func NewService(repository *repository.Repository, consumer consumer.Consumer, cache cache.RedisCache, initLimit int64) *Service {
 	return &Service{
-		OrderServiceInterface: NewOrderService(repository, consumer, cache),
+		OrderServiceInterface: NewOrderService(repository, consumer, cache, initLimit),
 	}
 }

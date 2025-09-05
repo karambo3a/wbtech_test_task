@@ -2,13 +2,19 @@ package repository
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 )
 
 func NewPostgresDB() (*sqlx.DB, error) {
 	dataSourceName := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		"postgres", "password", "localhost", "5433", "order", "disable")
+		os.Getenv("DATABASE_USER"),
+		os.Getenv("DATABASE_PASSWORD"),
+		os.Getenv("DATABASE_HOST"),
+		os.Getenv("DATABASE_PORT"),
+		os.Getenv("DATABASE_NAME"),
+		"disable")
 
 	db, err := sqlx.Connect("pgx", dataSourceName)
 	if err != nil {

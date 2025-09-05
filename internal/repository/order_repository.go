@@ -19,7 +19,6 @@ func NewOrderRepository(db *sqlx.DB) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-
 type dbOrder struct {
 	OrderUID          string    `db:"order_uid"`
 	TrackNumber       string    `db:"track_number"`
@@ -54,7 +53,7 @@ type dbOrder struct {
 }
 
 const (
-	GET_ORDER_QUERY = `SELECT
+	getOrderQuery = `SELECT
             o.order_uid,
             o.track_number,
             o.entry,
@@ -86,7 +85,7 @@ const (
         FROM orders o
         LEFT JOIN deliveries d ON o.delivery_id = d.id
         LEFT JOIN payments p ON o.payment_id = p.id`
-	GET_ITEMS_QUERY = `SELECT
+	getItemsQuery = `SELECT
             i.chrt_id,
             i.track_number,
             i.price,
@@ -102,25 +101,25 @@ const (
 		LEFT JOIN orders_x_items oi ON i.id = oi.item_id
 		LEFT JOIN orders o ON o.order_uid = oi.order_uid
 		WHERE o.order_uid = $1`
-	INSERT_DELIVERY_QUERY = `INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+	insertDeliveryQuery = `INSERT INTO deliveries (name, phone, zip, city, address, region, email)
 							VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (name, phone, zip, city, address, region, email) DO NOTHING RETURNING id;`
-	GET_DELIVERY_QUERY   = `SELECT id FROM deliveries WHERE name=$1 AND phone=$2 AND zip=$3 AND city=$4 AND address=$5 AND region=$6 AND email=$7`
-	INSERT_PAYMENT_QUERY = `INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
-							VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;`
-	INSERT_ORDER_QUERY = `INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
-						 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);`
-	INSERT_ITEM_QUERY = `INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+	getDeliveryQuery   = `SELECT id FROM deliveries WHERE name=$1 AND phone=$2 AND zip=$3 AND city=$4 AND address=$5 AND region=$6 AND email=$7`
+	insertPaymentQuery = `INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;`
+	insertOrderQuery = `INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+					 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);`
+	insertItemQuery = `INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`
-	INSERT_ORDERS_ITEMS_QUERY = `INSERT INTO orders_x_items (order_uid, item_id)
-								VALUES ($1, $2);`
+	insertOrdersItemsQuery = `INSERT INTO orders_x_items (order_uid, item_id)
+							VALUES ($1, $2);`
 )
 
-func (r *OrderRepository) GetOrder(orderUID string) (model.Order, error) {
+func (r *OrderRepository) GetOrder(orderUID string) (*model.Order, error) {
 	var dbOrd dbOrder
 
 	tx, err := r.db.Beginx()
 	if err != nil {
-		return model.Order{}, fmt.Errorf("failed to begin transaction: %w", err)
+		return &model.Order{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
 		if err := tx.Rollback(); err != nil {
@@ -128,12 +127,12 @@ func (r *OrderRepository) GetOrder(orderUID string) (model.Order, error) {
 		}
 	}()
 
-	err = tx.Get(&dbOrd, GET_ORDER_QUERY+" WHERE o.order_uid = $1", orderUID)
+	err = tx.Get(&dbOrd, getOrderQuery+" WHERE o.order_uid = $1", orderUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return model.Order{}, fmt.Errorf("order %s not found: %w", orderUID, err)
+			return &model.Order{}, fmt.Errorf("order %s not found: %w", orderUID, err)
 		}
-		return model.Order{}, fmt.Errorf("failed to get order %s: %w", orderUID, err)
+		return &model.Order{}, fmt.Errorf("failed to get order %s: %w", orderUID, err)
 	}
 
 	order := model.Order{
@@ -172,19 +171,19 @@ func (r *OrderRepository) GetOrder(orderUID string) (model.Order, error) {
 	}
 
 	var items []model.Item
-	err = tx.Select(&items, GET_ITEMS_QUERY, orderUID)
+	err = tx.Select(&items, getItemsQuery, orderUID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return model.Order{}, fmt.Errorf("failed to get items: %w", err)
+		return &model.Order{}, fmt.Errorf("failed to get items: %w", err)
 	}
 	order.Items = items
 
 	if err := tx.Commit(); err != nil {
-		return model.Order{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return &model.Order{}, fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return order, nil
+	return &order, nil
 }
 
-func (r *OrderRepository) SaveOrder(order model.Order) error {
+func (r *OrderRepository) SaveOrder(order *model.Order) error {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -196,7 +195,7 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 	}()
 
 	var deliveryID int64
-	err = tx.Get(&deliveryID, INSERT_DELIVERY_QUERY,
+	err = tx.Get(&deliveryID, insertDeliveryQuery,
 		order.Delivery.Name,
 		order.Delivery.Phone,
 		order.Delivery.Zip,
@@ -205,7 +204,7 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 		order.Delivery.Region,
 		order.Delivery.Email)
 	if err != nil {
-		err = tx.Get(&deliveryID, GET_DELIVERY_QUERY,
+		err = tx.Get(&deliveryID, getDeliveryQuery,
 			order.Delivery.Name,
 			order.Delivery.Phone,
 			order.Delivery.Zip,
@@ -221,7 +220,7 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 	}
 
 	var paymentID int
-	err = tx.Get(&paymentID, INSERT_PAYMENT_QUERY,
+	err = tx.Get(&paymentID, insertPaymentQuery,
 		order.Payment.Transaction,
 		order.Payment.RequestID,
 		order.Payment.Currency,
@@ -240,7 +239,7 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 	log.Printf("delivery_id=%d", deliveryID)
 	log.Printf("payment_id=%d", paymentID)
 
-	_, err = tx.Exec(INSERT_ORDER_QUERY,
+	_, err = tx.Exec(insertOrderQuery,
 		order.OrderUID,
 		order.TrackNumber,
 		order.Entry,
@@ -259,26 +258,26 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 		return fmt.Errorf("failed to insert new order: %w", err)
 	}
 
-	for i := 0; i < len(order.Items); i++ {
+	for _, item := range order.Items {
 		var itemID int64
-		err := tx.Get(&itemID, INSERT_ITEM_QUERY,
-			order.Items[i].ChrtID,
-			order.Items[i].TrackNumber,
-			order.Items[i].Price,
-			order.Items[i].Rid,
-			order.Items[i].Name,
-			order.Items[i].Sale,
-			order.Items[i].Size,
-			order.Items[i].TotalPrice,
-			order.Items[i].NmID,
-			order.Items[i].Brand,
-			order.Items[i].Status,
+		err := tx.Get(&itemID, insertItemQuery,
+			item.ChrtID,
+			item.TrackNumber,
+			item.Price,
+			item.Rid,
+			item.Name,
+			item.Sale,
+			item.Size,
+			item.TotalPrice,
+			item.NmID,
+			item.Brand,
+			item.Status,
 		)
 		if err != nil {
 			return fmt.Errorf("failed to insert new item: %w", err)
 		}
 
-		_, err = tx.Exec(INSERT_ORDERS_ITEMS_QUERY, order.OrderUID, itemID)
+		_, err = tx.Exec(insertOrdersItemsQuery, order.OrderUID, itemID)
 		if err != nil {
 			return fmt.Errorf("failed to insert new item: %w", err)
 		}
@@ -290,7 +289,7 @@ func (r *OrderRepository) SaveOrder(order model.Order) error {
 	return nil
 }
 
-func (r *OrderRepository) GetAllOrders() ([]model.Order, error) {
+func (r *OrderRepository) GetAllOrders(limit int64) ([]*model.Order, error) {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
@@ -302,14 +301,14 @@ func (r *OrderRepository) GetAllOrders() ([]model.Order, error) {
 	}()
 
 	var dbOrds []dbOrder
-	err = tx.Select(&dbOrds, GET_ORDER_QUERY+" ORDER BY o.date_created DESC LIMIT $1", int64(100))
+	err = tx.Select(&dbOrds, getOrderQuery+" ORDER BY o.date_created DESC LIMIT $1", limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get orders: %w", err)
 	}
 
-	var orders []model.Order
+	var orders []*model.Order
 	for _, dbOrd := range dbOrds {
-		order := model.Order{
+		order := &model.Order{
 			OrderUID:          dbOrd.OrderUID,
 			TrackNumber:       dbOrd.TrackNumber,
 			Entry:             dbOrd.Entry,
@@ -346,7 +345,7 @@ func (r *OrderRepository) GetAllOrders() ([]model.Order, error) {
 
 		var items []model.Item
 		err = tx.Select(&items,
-			GET_ITEMS_QUERY,
+			getItemsQuery,
 			dbOrd.OrderUID)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("failed to get items for order %s: %w", dbOrd.OrderUID, err)

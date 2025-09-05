@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	w := &kafka.Writer{
-		Addr:                   kafka.TCP("localhost:9092"),
+		Addr:                   kafka.TCP(os.Getenv("KAFKA_BROKERS_PROD")),
 		Topic:                  "order",
 		AllowAutoTopicCreation: true,
 	}

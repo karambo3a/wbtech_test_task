@@ -80,4 +80,79 @@ INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_pr
 VALUES (9934930, 'WBILMTESTTRACK', 453, 'ab4219087a764ae0btest', 'Mascaras', 30, '0', 317, 2389212, 'Vivienne Sabo', 202);
 
 INSERT INTO orders_x_items (order_uid, item_id)
-VALUES ('b563feb7b2b84b6test', 1)
+VALUES ('b563feb7b2b84b6test', 1);
+
+INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+VALUES ('John Smith', '+442012345678', 'SW1A 1AA', 'London', '10 Downing Street', 'Greater London', 'john.smith@email.com');
+
+INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+VALUES ('order_1700000001_1234', 'req_0001', 'GBP', 'stripe', 5420, 1672534891, 'barclays', 500, 4920, 0);
+
+INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+VALUES ('order_1700000001_1234', 'WBILTRACK000001', 'WBIL', 2, 2, 'en', 'signature_001', 'customer_001', 'dhl', '1', 42, '2023-01-15T14:28:31Z', '1');
+
+INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+VALUES (87654321, 'WBILTRACK000001', 2460, 'rid_0001', 'Sports Sneakers', 15, '42', 2091, 6543210, 'Nike', 200);
+
+INSERT INTO orders_x_items (order_uid, item_id)
+VALUES ('order_1700000001_1234', 2);
+
+INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+VALUES ('Emma Johnson', '+13125551234', '10001', 'New York', '350 5th Avenue', 'New York', 'emma.johnson@email.com');
+
+INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+VALUES ('order_1700000002_5678', 'req_0002', 'USD', 'paypal', 8900, 1672621291, 'chase', 300, 8600, 0);
+
+INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+VALUES ('order_1700000002_5678', 'WBILTRACK000002', 'WBIL', 3, 3, 'en', 'signature_002', 'customer_002', 'fedex', '2', 43, '2023-01-16T10:15:22Z', '2');
+
+INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+VALUES (87654322, 'WBILTRACK000002', 4300, 'rid_0002', 'Smartphone', 10, '0', 3870, 6543211, 'Apple', 200);
+
+INSERT INTO orders_x_items (order_uid, item_id)
+VALUES ('order_1700000002_5678', 3);
+
+INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+VALUES ('Michael Brown', '+61391234567', '2000', 'Sydney', '1 Macquarie Street', 'NSW', 'michael.brown@email.com');
+
+INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+VALUES ('order_1700000003_9012', 'req_0003', 'AUD', 'afterpay', 12500, 1672707691, 'commonwealth', 700, 11800, 0);
+
+INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+VALUES ('order_1700000003_9012', 'WBILTRACK000003', 'WBIL', 4, 4, 'en', 'signature_003', 'customer_003', 'australia post', '3', 44, '2023-01-17T16:45:18Z', '3');
+
+INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+VALUES (87654323, 'WBILTRACK000003', 5900, 'rid_0003', 'Laptop', 5, '15.6', 5605, 6543212, 'Dell', 200);
+
+INSERT INTO orders_x_items (order_uid, item_id)
+VALUES ('order_1700000003_9012', 4);
+
+INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+VALUES ('Sarah Wilson', '+498912345678', '10115', 'Berlin', 'Unter den Linden 77', 'Berlin', 'sarah.wilson@email.com');
+
+INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+VALUES ('order_1700000004_3456', 'req_0004', 'EUR', 'klarna', 7800, 1672794091, 'deutsche', 400, 7400, 0);
+
+INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+VALUES ('order_1700000004_3456', 'WBILTRACK000004', 'WBIL', 5, 5, 'en', 'signature_004', 'customer_004', 'dhl', '4', 45, '2023-01-18T09:30:45Z', '4');
+
+INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+VALUES (87654324, 'WBILTRACK000004', 3700, 'rid_0004', 'Tablet', 20, '10.1', 2960, 6543213, 'Samsung', 200);
+
+INSERT INTO orders_x_items (order_uid, item_id)
+VALUES ('order_1700000004_3456', 5);
+
+INSERT INTO deliveries (name, phone, zip, city, address, region, email)
+VALUES ('David Taylor', '+14165551234', 'M5V 2T6', 'Toronto', '1 Dundas Street West', 'Ontario', 'david.taylor@email.com');
+
+INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee)
+VALUES ('order_1700000005_7890', 'req_0005', 'CAD', 'shopify', 15600, 1672880491, 'royal bank', 600, 15000, 0);
+
+INSERT INTO orders (order_uid, track_number, entry, delivery_id, payment_id, locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard)
+VALUES ('order_1700000005_7890', 'WBILTRACK000005', 'WBIL', 6, 6, 'en', 'signature_005', 'customer_005', 'canada post', '5', 46, '2023-01-19T14:20:33Z', '5');
+
+INSERT INTO items (chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
+VALUES (87654325, 'WBILTRACK000005', 7500, 'rid_0005', 'Digital Camera', 25, '0', 5625, 6543214, 'Canon', 200);
+
+INSERT INTO orders_x_items (order_uid, item_id)
+VALUES ('order_1700000005_7890', 6);

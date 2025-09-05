@@ -3,11 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/karambo3a/wbtech_test_task/internal/cache"
 	"github.com/karambo3a/wbtech_test_task/internal/consumer"
-	"github.com/karambo3a/wbtech_test_task/internal/handler"
+	"github.com/karambo3a/wbtech_test_task/internal/handlers"
 	"github.com/karambo3a/wbtech_test_task/internal/repository"
 	"github.com/karambo3a/wbtech_test_task/internal/service"
 )
@@ -28,14 +29,14 @@ func main() {
 
 	consumer := consumer.NewConsumer()
 	cache := cache.NewRedisCache(50)
-	service := service.NewService(repository, consumer, cache)
+	service := service.NewService(repository, consumer, cache, int64(100))
 	log.Println("service created")
 	defer service.CloseConsumer()
 
-	handler := handler.NewHandler(service)
+	handler := handlers.NewHandler(service)
 	log.Println("handler created")
 
-	if err := http.ListenAndServe(":8081", handler.InitRouts()); err != nil {
+	if err := http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), handler.InitRouts()); err != nil {
 		panic(err)
 	}
 }
